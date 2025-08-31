@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>visualiser</title>
+    <style>
+         :root {
+            --bg: #0b1220;
+            --panel: #111827;
+            --panel-2: #0f172a;
+            --border: #1f2a44;
+            --text: #e5e7eb;
+            --muted: #9ca3af;
+            --accent: #60a5fa;
+            --accent-2: #38bdf8;
+            --shadow: 0 10px 30px rgba(0, 0, 0, .35), 0 2px 8px rgba(0, 0, 0, .25);
+            --radius: 16px;
+        }
+        
+        * {
+            box-sizing: border-box
+        }
+        
+        html,
+        body {
+            height: 100%
+        }
+        
+        body {
+            margin: 0;
+            color: var(--text);
+            font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+            background: radial-gradient(1200px 800px at 80% -200px, #0f1a33 0%, var(--bg) 50%, var(--bg) 100%);
+        }
+        /* Header */
+        
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: linear-gradient(90deg, var(--panel-2), var(--panel));
+            border-bottom: 1px solid var(--border);
+            box-shadow: var(--shadow)
+        }
+        
+        .header-inner {
+            max-width: 1500px;
+            margin: 0 auto;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center
+        }
+        
+        .logo {
+            font-weight: 800;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            font-size: 22px
+        }
+        
+        .tag {
+            margin-left: auto;
+            font-size: 12px;
+            color: var(--muted)
+        }
+        
+        .tag b {
+            color: var(--accent)
+        }
+        /* Layout */
+        
+        .layout {
+            max-width: 1500px;
+            margin: 20px auto;
+            padding: 0 16px;
+            display: grid;
+            grid-template-columns: 220px 340px 1fr;
+            gap: 18px
+        }
+        
+        @media (max-width:1100px) {
+            .layout {
+                grid-template-columns: 1fr
+            }
+            .tools {
+                order: 2
+            }
+            .settings {
+                order: 3
+            }
+            .stage {
+                order: 1
+            }
+        }
+        
+        .panel {
+            background: linear-gradient(180deg, rgba(255, 255, 255, .02), transparent 120px), var(--panel);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px;
+            box-shadow: var(--shadow)
+        }
+        
+        .panel h3 {
+            margin: 0 0 12px;
+            font-size: 14px;
+            color: var(--muted);
+            font-weight: 700;
+            letter-spacing: .08em;
+            text-transform: uppercase
+        }
+        
+        .group {
+            border-top: 1px solid var(--border);
+            padding-top: 12px;
+            margin-top: 12px
+        }
+        
+        .opt {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            padding: 10px 8px;
+            border-radius: 12px;
+            cursor: pointer
+        }
+        
+        .opt:hover {
+            background: #0f1d33
+        }
+        
+        .opt input {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 6px;
+            border: 2px solid var(--accent);
+            display: grid;
+            place-items: center
+        }
+        
+        .opt input::after {
+            content: "";
+            width: 12px;
+            height: 12px;
+            border-radius: 4px;
+            transform: scale(0);
+            transition: transform .15s;
+            background: linear-gradient(180deg, var(--accent), var(--accent-2))
+        }
+        
+        .opt input:checked::after {
+            transform: scale(1)
+        }
+        
+        .opt small {
+            color: var(--muted)
+        }
+        /* Bühne */
+        
+        .stage {
+            min-height: 620px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 18px
+        }
+        
+        .canvas {
+            width: 100%;
+            height: 100%;
+            position: relative
+        }
+        
+        .hint {
+            position: absolute;
+            inset: auto auto 18px 18px;
+            color: var(--muted);
+            font-size: 13px
+        }
+        /* Blöcke */
+        
+        .block {
+            position: absolute;
+            min-width: 160px;
+            padding: 12px 14px;
+            background: #102135;
+            border: 1px solid #1a3a66;
+            color: #dbeafe;
+            border-radius: 14px;
+            text-align: center;
+            font-weight: 700;
+            box-shadow: 0 10px 18px rgba(4, 17, 46, .35) inset, 0 10px 22px rgba(0, 0, 0, .25)
+        }
+        
+        .chip {
+            display: inline-block;
+            font-size: 12px;
+            color: #89b4ff;
+            background: #0b1b32;
+            border: 1px solid #19345a;
+            padding: 2px 8px;
+            border-radius: 9999px;
+            margin-top: 6px
+        }
+        /* CPU-Rahmen (um Rechen- & Steuerwerk) */
+        
+        .cpu-frame {
+            position: absolute;
+            left: 150px;
+            top: 180px;
+            width: 600px;
+            height: 110px;
+            border-radius: 16px;
+            border: 2px dashed #2b579a;
+            display: none;
+            background-color: #34d399;
+        }
+        
+        .cpu-label {
+            position: absolute;
+            left: 50%;
+            top: -16px;
+            transform: translateX(-50%);
+            background: #0b1b2b;
+            border: 1px solid #153257;
+            padding: 4px 10px;
+            border-radius: 10px;
+            font-weight: 800
+        }
+        /* Busse (ohne Pfeile) */
+        
+        svg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%
+        }
+        
+        .bus {
+            stroke: #93c5fd;
+            stroke-width: 3
+        }
+        
+        .bus-addr {
+            stroke: #34d399;
+            stroke-width: 3
+        }
+        
+        .bus-ctrl {
+            stroke: #fca5a5;
+            stroke-width: 3
+        }
+        
+        .systembus {
+            stroke: #93c5fd;
+            stroke-width: 12;
+            opacity: .9
+        }
+        
+        .hide {
+            display: none
+        }
+        /* Legenden */
+        
+        .legend {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            background: #0b1b2b;
+            border: 1px solid #153257;
+            color: #c7d2fe;
+            border-radius: 12px;
+            padding: 10px 12px;
+            font-size: 13px
+        }
+        
+        .legend div {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 6px 0
+        }
+        
+        .legline {
+            width: 40px;
+            height: 3px;
+            background: #8ab4ff;
+            border-radius: 2px
+        }
+        
+        .legline.addr {
+            background: #34d399
+        }
+        
+        .legline.ctrl {
+            background: #fca5a5
+        }
+        
+        .legline.thick {
+            height: 6px
+        }
+    </style>
+</head>
+
+<body>
+    <header class="header">
+        <div class="header-inner">
+            <div class="logo">visualiser</div>
+            <div class="tag">Interaktive Unterrichtstools • <b>Dark</b> Colorpack</div>
+        </div>
+    </header>
+
+    <main class="layout">
+        <!-- Tools -->
+        <aside class="panel tools">
+            <h3>Tools</h3>
+            <label class="opt">
+      <input id="chk-vna" type="checkbox" />
+      <div>
+        <div>Von-Neumann-Architektur</div>
+        <small>Darstellung in der Mitte anzeigen</small>
+      </div>
+    </label>
+        </aside>
+
+        <!-- Details -->
+        <aside class="panel settings">
+            <h3>Detail­einstellungen</h3>
+
+            <label class="opt">
+      <input id="chk-dreiwerke" type="checkbox" />
+      <div>
+        <div>„Drei Werke“ einblenden</div>
+        <small>ALU (Rechenwerk) • Registerwerk • Steuerwerk & Speicherwerk</small>
+      </div>
+    </label>
+
+            <label class="opt">
+      <input id="chk-steuerwerk-label" type="checkbox" />
+      <div>
+        <div>Steuerwerk-Beschriftung</div>
+        <small>Label anzeigen</small>
+      </div>
+    </label>
+
+            <label class="opt">
+      <input id="chk-rechenwerk-label" type="checkbox" />
+      <div>
+        <div>Rechenwerk-Beschriftung</div>
+        <small>Label anzeigen</small>
+      </div>
+    </label>
+
+            <label class="opt">
+      <input id="chk-cpu-frame" type="checkbox" />
+      <div>
+        <div>CPU-Rahmen einblenden</div>
+        <small>Rahmen um Rechen- & Steuerwerk (mit „CPU“)</small>
+      </div>
+    </label>
+
+            <label class="opt">
+      <input id="chk-mem-label" type="checkbox" />
+      <div>
+        <div>Speicherwerk-Beschriftung</div>
+        <small>Label anzeigen</small>
+      </div>
+    </label>
+
+            <div class="group">
+                <h3>Bus-Variante</h3>
+                <label class="opt">
+        <input id="bus-simple" type="radio" name="busmode" checked />
+        <div>
+          <div>Einfacher Systembus</div>
+          <small>ein dicker Strich</small>
+        </div>
+      </label>
+                <label class="opt">
+        <input id="bus-triple" type="radio" name="busmode" />
+        <div>
+          <div>Drei-Bus-System</div>
+          <small>Daten • Adresse • Kontrolle</small>
+        </div>
+      </label>
+            </div>
+
+            <div class="group">
+                <label class="opt">
+        <input id="chk-io" type="checkbox" />
+        <div>
+          <div>Ein/Ausgabe einblenden</div>
+          <small>als „periphere Geräte“ anzeigen</small>
+        </div>
+      </label>
+
+                <label class="opt">
+        <input id="chk-io-rename" type="checkbox" />
+        <div>
+          <div>Als „periphere Geräte“ benennen</div>
+          <small>ändert die Beschriftung der Ein/Ausgabe</small>
+        </div>
+      </label>
+            </div>
+        </aside>
+
+        <!-- Bühne -->
+        <section class="panel stage">
+            <div class="canvas" id="canvas">
+
+                <!-- Bus VARIANTEN (Vertikalanschlüsse bei x=360,600,820) -->
+                <svg id="svg-triple" viewBox="0 0 1000 620" preserveAspectRatio="none" class="hide">
+        <line class="bus"     x1="160" y1="420" x2="860" y2="420"/>
+        <line class="bus-addr" x1="160" y1="460" x2="860" y2="460"/>
+        <line class="bus-ctrl" x1="160" y1="380" x2="860" y2="380"/>
+        <!-- Abgänge hoch -->
+        <line class="bus" x1="360" y1="240" x2="360" y2="460"/>
+        <line class="bus" x1="600" y1="240" x2="600" y2="460"/>
+        <line class="bus" x1="820" y1="240" x2="820" y2="460"/>
+         <line class="bus" x1="200" y1="380" x2="200" y2="530"/>
+        
+      </svg>
+
+                <svg id="svg-simple" viewBox="0 0 1000 620" preserveAspectRatio="none">
+        <line class="systembus" x1="160" y1="440" x2="860" y2="440"/>
+        <line class="systembus" x1="360" y1="240" x2="360" y2="440"/>
+        <line class="systembus" x1="600" y1="240" x2="600" y2="440"/>
+        <line class="systembus" x1="820" y1="240" x2="820" y2="440"/>
+      </svg>
+
+                <!-- CPU-Rahmen (nur um RW & SW) -->
+                <div id="cpu-frame" class="cpu-frame">
+                    <div class="cpu-label">CPU</div>
+                </div>
+
+                <!-- Drei Werke -->
+                <div id="alu" class="block" style="left:320px; top:100px; display:none;">CPU
+                    <div class="chip" id="lbl-alu" style="display:none">Rechenwerk</div>
+                </div>
+                <div id="rw" class="block" style="left:220px; top:200px; display:none;">Rechenwerk</div>
+                <div id="sw" class="block" style="left:430px; top:200px; display:none;">Steuerwerk
+                    <div class="chip" id="lbl-sw" style="display:none">Steuerwerk</div>
+                </div>
+
+                <!-- Speicher & I/O (beide initial ausgeblendet) -->
+                <div id="mem" class="block" style="left:600px; top:200px; display:none;">
+                    Speicher
+                    <div class="chip" id="lbl-mem" style="display:none">Speicherwerk</div>
+                </div>
+
+                <div id="io" class="block" style="left:180px; top:600px; display:none;">
+                    Ein/Ausgabe
+                    <div class="chip">Tastatur · Anzeige · SSD</div>
+                </div>
+
+                <!-- Legenden -->
+                <div id="legend-triple" class="legend hide">
+                    <div><span class="legline"></span> Datenbus</div>
+                    <div><span class="legline addr"></span> Adressbus</div>
+                    <div><span class="legline ctrl"></span> Kontrollbus</div>
+                </div>
+                <div id="legend-simple" class="legend">
+                    <div><span class="legline thick"></span> Systembus</div>
+                </div>
+
+                <div class="hint">Tipp: <span style="background:#0b1b32;border:1px solid #18345a;padding:2px 6px;border-radius:6px">Leertaste</span> toggelt die Anzeige.</div>
+            </div>
+        </section>
+    </main>
+
+    <div style="max-width:1500px;margin:14px auto 40px;padding:0 16px;color:var(--muted);font-size:12px">
+        © Dein Unterrichtstool • Von-Neumann-Architektur mit wählbarem Detailgrad
+    </div>
+
+    <script>
+        // Controls
+        const chkVNA = document.getElementById('chk-vna');
+        const chkDrei = document.getElementById('chk-dreiwerke');
+        const chkSWLbl = document.getElementById('chk-steuerwerk-label');
+        const chkRWLbl = document.getElementById('chk-rechenwerk-label');
+        const chkCPUFrame = document.getElementById('chk-cpu-frame');
+        const chkMemLbl = document.getElementById('chk-mem-label');
+        const chkIO = document.getElementById('chk-io');
+        const chkIORename = document.getElementById('chk-io-rename');
+
+        const busSimple = document.getElementById('bus-simple');
+        const busTriple = document.getElementById('bus-triple');
+
+        // Stage elements
+        const svgTriple = document.getElementById('svg-triple');
+        const svgSimple = document.getElementById('svg-simple');
+        const legendTriple = document.getElementById('legend-triple');
+        const legendSimple = document.getElementById('legend-simple');
+
+        const cpuFrame = document.getElementById('cpu-frame');
+        const alu = document.getElementById('alu');
+        const rw = document.getElementById('rw');
+        const sw = document.getElementById('sw');
+        const lblALU = document.getElementById('lbl-alu');
+        const lblSW = document.getElementById('lbl-sw');
+
+        const mem = document.getElementById('mem');
+        const lblMEM = document.getElementById('lbl-mem');
+        const io = document.getElementById('io');
+
+        const show = (el, on) => el.classList.toggle('hide', !on);
+        const disp = (el, on) => el.style.display = on ? '' : 'none';
+
+        function applyVNA() {
+            const on = chkVNA.checked;
+
+            // Busse
+            show(svgSimple, on && busSimple.checked);
+            show(legendSimple, on && busSimple.checked);
+            show(svgTriple, on && busTriple.checked);
+            show(legendTriple, on && busTriple.checked);
+
+            // Sichtbarkeit der Werke / Speicher / IO
+            applyDreiWerke(); // zeigt ALU, RW, SW + Speicher, wenn aktiviert
+            applyMemLabel();
+            applyCpuFrame();
+            applyIoVisibility();
+            applyIoRename();
+        }
+
+        function applyBusVariant() {
+            if (!chkVNA.checked) return;
+            show(svgSimple, busSimple.checked);
+            show(legendSimple, busSimple.checked);
+            show(svgTriple, busTriple.checked);
+            show(legendTriple, busTriple.checked);
+        }
+
+        function applyDreiWerke() {
+            // Rechen- & Steuerwerk + ALU erscheinen nur, wenn VNA + DreiWerke
+            const worksOn = chkVNA.checked && chkDrei.checked;
+            disp(alu, worksOn);
+            disp(rw, worksOn);
+            disp(sw, worksOn);
+
+            // Speicher erscheint ebenfalls mit „Drei Werke“
+            disp(mem, worksOn);
+
+            // Labels der Werke
+            lblALU.style.display = (worksOn && chkRWLbl.checked) ? 'inline-block' : 'none';
+            lblSW.style.display = (worksOn && chkSWLbl.checked) ? 'inline-block' : 'none';
+        }
+
+        function applyCpuFrame() {
+            // Rahmen nur wenn VNA + DreiWerke + Option aktiv
+            const on = chkVNA.checked && chkDrei.checked && chkCPUFrame.checked;
+            disp(cpuFrame, on);
+        }
+
+        function applyMemLabel() {
+            const on = chkVNA.checked && chkDrei.checked && chkMemLbl.checked;
+            lblMEM.style.display = on ? 'inline-block' : 'none';
+        }
+
+        function applyIoVisibility() {
+            // IO separat steuerbar; initial aus
+            const on = chkVNA.checked && chkIO.checked;
+            disp(io, on);
+        }
+
+        function applyIoRename() {
+            const title = chkIORename.checked ? 'Periphere Geräte' : 'Ein/Ausgabe';
+            if (io.firstChild) io.firstChild.nodeValue = title;
+        }
+
+        // Init: alles aus
+        applyVNA();
+
+        // Events
+        chkVNA.addEventListener('change', applyVNA);
+        [busSimple, busTriple].forEach(r => r.addEventListener('change', applyBusVariant));
+
+        chkDrei.addEventListener('change', () => {
+            applyDreiWerke();
+            applyCpuFrame();
+            applyMemLabel();
+        });
+        chkSWLbl.addEventListener('change', () => {
+            lblSW.style.display = (chkVNA.checked && chkDrei.checked && chkSWLbl.checked) ? 'inline-block' : 'none';
+        });
+        chkRWLbl.addEventListener('change', () => {
+            lblALU.style.display = (chkVNA.checked && chkDrei.checked && chkRWLbl.checked) ? 'inline-block' : 'none';
+        });
+        chkCPUFrame.addEventListener('change', applyCpuFrame);
+        chkMemLbl.addEventListener('change', applyMemLabel);
+
+        chkIO.addEventListener('change', applyIoVisibility);
+        chkIORename.addEventListener('change', applyIoRename);
+
+        // Space toggelt Hauptcheckbox
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                chkVNA.checked = !chkVNA.checked;
+                applyVNA();
+            }
+        });
+    </script>
+</body>
+
+</html>
