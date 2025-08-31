@@ -16,7 +16,7 @@
             --accent: #60a5fa;
             --accent-2: #38bdf8;
             --shadow: 0 10px 30px rgba(0, 0, 0, .35), 0 2px 8px rgba(0, 0, 0, .25);
-            --radius: 16px;
+            --radius: 16px
         }
         
         * {
@@ -32,9 +32,8 @@
             margin: 0;
             color: var(--text);
             font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
-            background: radial-gradient(1200px 800px at 80% -200px, #0f1a33 0%, var(--bg) 50%, var(--bg) 100%);
+            background: radial-gradient(1200px 800px at 80% -200px, #0f1a33 0%, var(--bg) 50%, var(--bg) 100%)
         }
-        /* Header */
         
         .header {
             position: sticky;
@@ -65,11 +64,6 @@
             font-size: 12px;
             color: var(--muted)
         }
-        
-        .tag b {
-            color: var(--accent)
-        }
-        /* Layout */
         
         .layout {
             max-width: 1500px;
@@ -158,7 +152,6 @@
         .opt small {
             color: var(--muted)
         }
-        /* Bühne */
         
         .stage {
             min-height: 620px;
@@ -167,7 +160,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 18px
+            padding: 18px;
+            z-index: 1
         }
         
         .canvas {
@@ -182,7 +176,6 @@
             color: var(--muted);
             font-size: 13px
         }
-        /* Blöcke */
         
         .block {
             position: absolute;
@@ -207,22 +200,18 @@
             border-radius: 9999px;
             margin-top: 6px
         }
-        /* Zeilenumbruch-Labels */
         
         .label {
             display: block;
             margin-top: 6px
         }
-        /* CPU-Rahmen (um RW & SW & CPU) */
         
         .cpu-frame {
             position: absolute;
             left: 200px;
-            /* umfasst RW (x≈220) bis SW (x≈430+160) */
             top: 160px;
             width: 420px;
             height: 160px;
-            /* genug Platz für CPU-Feld + RW/SW */
             border-radius: 16px;
             border: 2px dashed #2b579a;
             display: none;
@@ -240,7 +229,6 @@
             border-radius: 10px;
             font-weight: 800
         }
-        /* Busse (ohne Pfeile) */
         
         svg {
             position: absolute;
@@ -271,9 +259,9 @@
         }
         
         .hide {
-            display: none
+            display: none !important
         }
-        /* Legenden */
+        /* <- HARTES Ausblenden */
         
         .legend {
             position: absolute;
@@ -312,6 +300,82 @@
         .legline.thick {
             height: 6px
         }
+        /* Overlays/Buttons */
+        
+        .overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(180deg, rgba(5, 12, 24, .85), rgba(5, 12, 24, .75));
+            backdrop-filter: blur(4px) saturate(120%)
+        }
+        
+        .info-card {
+            width: min(760px, 92%);
+            max-height: 80%;
+            background: linear-gradient(180deg, rgba(255, 255, 255, .02), transparent 140px), var(--panel-2);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden
+        }
+        
+        .info-card header {
+            padding: 16px 18px;
+            border-bottom: 1px solid var(--border);
+            font-weight: 800;
+            font-size: 18px;
+            letter-spacing: .02em
+        }
+        
+        .card-body {
+            padding: 16px 18px;
+            overflow-y: auto;
+            line-height: 1.5
+        }
+        
+        .card-footer {
+            padding: 12px 18px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px
+        }
+        
+        .btn {
+            appearance: none;
+            border: 1px solid var(--border);
+            background: #0f1d33;
+            padding: 10px 14px;
+            border-radius: 12px;
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .25)
+        }
+        
+        .btn:hover {
+            filter: brightness(1.05)
+        }
+        
+        .btn-primary {
+            border-color: #2463eb;
+            background: linear-gradient(180deg, var(--accent), var(--accent-2));
+            color: #041223;
+            font-weight: 800
+        }
+        
+        .floating-next {
+            position: absolute;
+            right: 22px;
+            bottom: 22px;
+            z-index: 2
+        }
     </style>
 </head>
 
@@ -324,7 +388,7 @@
     </header>
 
     <main class="layout">
-        <!-- Tools -->
+        <!-- Links: Architektur (immer sichtbar) -->
         <aside class="panel tools">
             <h3>Architektur</h3>
             <label class="opt">
@@ -336,8 +400,8 @@
     </label>
         </aside>
 
-        <!-- Details -->
-        <aside class="panel settings">
+        <!-- Mitte: Detaileinstellungen (Start = VERSTECKT) -->
+        <aside class="panel settings hide">
             <h3>Detail­einstellungen</h3>
 
             <label class="opt">
@@ -417,23 +481,35 @@
             </div>
         </aside>
 
-        <!-- Bühne -->
-        <section class="panel stage">
-            <div class="canvas" id="canvas">
+        <!-- Rechts: Bühne/Modell (Start = VERSTECKT) -->
+        <section class="panel stage hide">
+            <!-- Overlay 1: Info-Karte -->
+            <div id="intro-overlay" class="overlay hide" role="dialog" aria-modal="true" aria-label="Einführung">
+                <div class="info-card">
+                    <header>Einführung</header>
+                    <div class="card-body">
+                        <p><b>Dummy-Infotext:</b> Hier steht die kurze Einführung. Dieser Bereich ist scrollbar und kann von dir mit eigenem Text gefüllt werden.</p>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus ante dapibus diam. Sed nisi. Nulla quis sem at nibh elementum imperdiet.</p>
+                    </div>
+                    <div class="card-footer">
+                        <button id="btn-intro-next" class="btn btn-primary">Weiter</button>
+                    </div>
+                </div>
+            </div>
 
-                <!-- Bus VARIANTEN (Vertikalanschlüsse bei x=360,600,820) -->
-                <svg id="svg-triple" viewBox="0 0 1000 620" preserveAspectRatio="none" class="hide">
+            <div class="canvas" id="canvas" aria-live="polite">
+                <!-- Bus VARIANTEN -->
+                <svg id="svg-triple" viewBox="0 0 1000 620" preserveAspectRatio="none" class="hide" aria-hidden="true">
         <line class="bus"      x1="160" y1="420" x2="860" y2="420"/>
         <line class="bus-addr" x1="160" y1="460" x2="860" y2="460"/>
         <line class="bus-ctrl" x1="160" y1="380" x2="860" y2="380"/>
-        <!-- Abgänge hoch -->
         <line class="bus" x1="360" y1="240" x2="360" y2="460"/>
         <line class="bus" x1="600" y1="240" x2="600" y2="460"/>
         <line class="bus" x1="820" y1="240" x2="820" y2="460"/>
         <line class="bus" x1="200" y1="380" x2="200" y2="530"/>
       </svg>
 
-                <svg id="svg-simple" viewBox="0 0 1000 620" preserveAspectRatio="none">
+                <svg id="svg-simple" viewBox="0 0 1000 620" preserveAspectRatio="none" aria-hidden="true">
         <line class="systembus" x1="160" y1="440" x2="860" y2="440"/>
         <line class="systembus" x1="360" y1="240" x2="360" y2="440"/>
         <line class="systembus" x1="600" y1="240" x2="600" y2="440"/>
@@ -441,36 +517,17 @@
         <line class="systembus" x1="200" y1="440" x2="200" y2="530"/>
       </svg>
 
-                <!-- CPU-Rahmen (um RW & SW & CPU) -->
+                <!-- CPU-Rahmen -->
                 <div id="cpu-frame" class="cpu-frame">
                     <div class="cpu-label">CPU</div>
                 </div>
-
-                <!-- CPU-Feld (erscheint zusammen mit CPU-Rahmen) -->
-                <div id="cpu-pill" class="block" style="left:210px; top:160px; width: 380px; height: 130px; display:none;">CPU</div>
-
-
-
+                <div id="cpu-pill" class="block" style="left:210px; top:160px; width:380px; height:130px; display:none;">CPU</div>
 
                 <!-- Drei Werke -->
-                <div id="rw" class="block" style="left:220px; top:200px; display:none;">
-                    Rechenwerk
-                    <span class="label chip" id="lbl-rw" style="display:none">Rechenwerk</span>
-                </div>
-
-                <div id="sw" class="block" style="left:420px; top:200px; display:none;">
-                    Steuerwerk
-                    <span class="label chip" id="lbl-sw" style="display:none">Steuerwerk</span>
-                </div>
-
-                <!-- Speicher & I/O (beide initial ausgeblendet) -->
-                <div id="mem" class="block" style="left:600px; top:200px; display:none;">
-                    Speicher
-                    <span class="label chip" id="lbl-mem" style="display:none">Speicherwerk</span>
-                </div>
-
-                <div id="io" class="block" style="left:180px; top:600px; display:none;">
-                    Ein/Ausgabe
+                <div id="rw" class="block" style="left:220px; top:200px; display:none;">Rechenwerk <span class="label chip" id="lbl-rw" style="display:none">Rechenwerk</span></div>
+                <div id="sw" class="block" style="left:420px; top:200px; display:none;">Steuerwerk <span class="label chip" id="lbl-sw" style="display:none">Steuerwerk</span></div>
+                <div id="mem" class="block" style="left:600px; top:200px; display:none;">Speicher <span class="label chip" id="lbl-mem" style="display:none">Speicherwerk</span></div>
+                <div id="io" class="block" style="left:180px; top:600px; display:none;">Ein/Ausgabe
                     <div class="chip">Tastatur · Anzeige · SSD</div>
                 </div>
 
@@ -486,15 +543,39 @@
 
                 <div class="hint">Tipp: <span style="background:#0b1b32;border:1px solid #18345a;padding:2px 6px;border-radius:6px">Leertaste</span> toggelt die Anzeige.</div>
             </div>
+
+            <!-- Weiter-Button von Schritt 2 -->
+            <button id="btn-stage-next" class="btn btn-primary floating-next hide">Weiter</button>
+
+            <!-- Overlay 2: Merksatzübersicht -->
+            <div id="notes-overlay" class="overlay hide" role="dialog" aria-modal="true" aria-label="Merksatzübersicht">
+                <div class="info-card">
+                    <header>Merksatzübersicht</header>
+                    <div class="card-body">
+                        <ul>
+                            <li>Ein Computer arbeitet nach dem Von-Neumann-Prinzip: Befehle und Daten liegen im gemeinsamen Speicher.</li>
+                            <li>Rechenwerk führt Operationen aus, Steuerwerk steuert den Ablauf.</li>
+                            <li>Der (System-)Bus verbindet die Komponenten und transportiert Daten, Adressen und Steuersignale.</li>
+                        </ul>
+                    </div>
+                    <div class="card-footer">
+                        <button id="btn-notes-close" class="btn">Schließen</button>
+                    </div>
+                </div>
+            </div>
         </section>
     </main>
 
     <div style="max-width:1500px;margin:14px auto 40px;padding:0 16px;color:var(--muted);font-size:12px">
-        <a id="footerLink" href="https://datenflix007.github.io/" target="_blank" rel="noopener" style="color: white; text-decoration: none;">© <span id="year"></span> Felix Staacke</a>
+        <a id="footerLink" href="https://datenflix007.github.io/" target="_blank" rel="noopener" style="color:white;text-decoration:none;">© <span id="year"></span> Felix Staacke</a>
     </div>
 
     <script>
-        // Controls
+        // --- Panels ---
+        const settingsPanel = document.querySelector('.panel.settings');
+        const stagePanel = document.querySelector('.panel.stage');
+
+        // --- Controls ---
         const chkVNA = document.getElementById('chk-vna');
         const chkDrei = document.getElementById('chk-dreiwerke');
         const chkSWLbl = document.getElementById('chk-steuerwerk-label');
@@ -503,40 +584,47 @@
         const chkMemLbl = document.getElementById('chk-mem-label');
         const chkIO = document.getElementById('chk-io');
         const chkIORename = document.getElementById('chk-io-rename');
-
         const busSimple = document.getElementById('bus-simple');
         const busTriple = document.getElementById('bus-triple');
 
-        // Stage elements
+        // --- Stage elements ---
         const svgTriple = document.getElementById('svg-triple');
         const svgSimple = document.getElementById('svg-simple');
         const legendTriple = document.getElementById('legend-triple');
         const legendSimple = document.getElementById('legend-simple');
-
         const cpuFrame = document.getElementById('cpu-frame');
         const cpuPill = document.getElementById('cpu-pill');
         const rw = document.getElementById('rw');
         const sw = document.getElementById('sw');
         const lblRW = document.getElementById('lbl-rw');
         const lblSW = document.getElementById('lbl-sw');
-
         const mem = document.getElementById('mem');
         const lblMEM = document.getElementById('lbl-mem');
         const io = document.getElementById('io');
 
-        const show = (el, on) => el.classList.toggle('hide', !on);
+        // --- Overlays/Buttons ---
+        const introOverlay = document.getElementById('intro-overlay');
+        const notesOverlay = document.getElementById('notes-overlay');
+        const btnIntroNext = document.getElementById('btn-intro-next');
+        const btnStageNext = document.getElementById('btn-stage-next');
+        const btnNotesClose = document.getElementById('btn-notes-close');
+
+        // Helpers (robust gegen CSS-Cache)
+        const forceShow = (el, on) => {
+            if (!el) return;
+            el.classList.toggle('hide', !on);
+            if (on) el.style.removeProperty('display');
+            else el.style.display = 'none';
+        };
         const disp = (el, on) => el.style.display = on ? '' : 'none';
 
+        // ---------- VISUALISIERUNGS-LOGIK ----------
         function applyVNA() {
             const on = chkVNA.checked;
-
-            // Busse
-            show(svgSimple, on && busSimple.checked);
-            show(legendSimple, on && busSimple.checked);
-            show(svgTriple, on && busTriple.checked);
-            show(legendTriple, on && busTriple.checked);
-
-            // Werke / Speicher / IO
+            forceShow(svgSimple, on && busSimple.checked);
+            forceShow(legendSimple, on && busSimple.checked);
+            forceShow(svgTriple, on && busTriple.checked);
+            forceShow(legendTriple, on && busTriple.checked);
             applyDreiWerke();
             applyMemLabel();
             applyCpuFrame();
@@ -546,31 +634,25 @@
 
         function applyBusVariant() {
             if (!chkVNA.checked) return;
-            show(svgSimple, busSimple.checked);
-            show(legendSimple, busSimple.checked);
-            show(svgTriple, busTriple.checked);
-            show(legendTriple, busTriple.checked);
+            forceShow(svgSimple, busSimple.checked);
+            forceShow(legendSimple, busSimple.checked);
+            forceShow(svgTriple, busTriple.checked);
+            forceShow(legendTriple, busTriple.checked);
         }
 
         function applyDreiWerke() {
-            // Rechen- & Steuerwerk erscheinen nur, wenn VNA + DreiWerke
             const worksOn = chkVNA.checked && chkDrei.checked;
             disp(rw, worksOn);
             disp(sw, worksOn);
-
-            // Speicher erscheint ebenfalls mit „Drei Werke“
             disp(mem, worksOn);
-
-            // Labels der Werke
             lblRW.style.display = (worksOn && chkRWLbl.checked) ? 'block' : 'none';
             lblSW.style.display = (worksOn && chkSWLbl.checked) ? 'block' : 'none';
         }
 
         function applyCpuFrame() {
-            // Rahmen + CPU-Feld nur wenn VNA + DreiWerke + Option aktiv
             const on = chkVNA.checked && chkDrei.checked && chkCPUFrame.checked;
             disp(cpuFrame, on);
-            disp(cpuPill, on); // CPU-Feld erscheint zusammen mit dem Rahmen
+            disp(cpuPill, on);
         }
 
         function applyMemLabel() {
@@ -579,8 +661,7 @@
         }
 
         function applyIoVisibility() {
-            const on = chkVNA.checked && chkIO.checked;
-            disp(io, on);
+            disp(io, chkVNA.checked && chkIO.checked);
         }
 
         function applyIoRename() {
@@ -588,11 +669,36 @@
             if (io.firstChild) io.firstChild.nodeValue = title;
         }
 
-        // Init
-        applyVNA();
+        // ---------- FLOW / STATE-MACHINE ----------
+        // 0 = Start (nur Architektur), 1 = Intro, 2 = Modell + Details, 3 = Merksatz
+        let flowStep = 0;
 
-        // Events
-        chkVNA.addEventListener('change', applyVNA);
+        function setStep(n) {
+            flowStep = n;
+            forceShow(settingsPanel, n >= 2); // Details erst ab Schritt 2
+            forceShow(stagePanel, n >= 1); // Bühne ab Schritt 1
+            forceShow(introOverlay, n === 1); // Intro nur in Schritt 1
+            forceShow(btnStageNext, n === 2); // Weiter nur in Schritt 2
+            forceShow(notesOverlay, n === 3); // Merksatz nur in Schritt 3
+            if (n >= 1) {
+                applyVNA();
+            }
+        }
+
+        // Startzustand
+        setStep(0);
+
+        function handleVNAChange() {
+            if (chkVNA.checked) {
+                setStep(1);
+            } // -> Intro-Karte
+            else {
+                setStep(0);
+            } // -> alles zurück
+        }
+
+        // ---------- EVENTS ----------
+        chkVNA.addEventListener('change', handleVNAChange);
         [busSimple, busTriple].forEach(r => r.addEventListener('change', applyBusVariant));
 
         chkDrei.addEventListener('change', () => {
@@ -608,18 +714,38 @@
         });
         chkCPUFrame.addEventListener('change', applyCpuFrame);
         chkMemLbl.addEventListener('change', applyMemLabel);
-
         chkIO.addEventListener('change', applyIoVisibility);
         chkIORename.addEventListener('change', applyIoRename);
 
-        // Space toggelt Hauptcheckbox
+        // Space toggelt Architektur
         window.addEventListener('keydown', (e) => {
             if (e.code === 'Space') {
                 e.preventDefault();
                 chkVNA.checked = !chkVNA.checked;
-                applyVNA();
+                handleVNAChange();
             }
+            if (e.key === 'Escape' && flowStep === 3) {
+                setStep(2);
+            } // ESC schließt Merksatz
         });
+
+        // Kartenfluss
+        btnIntroNext.addEventListener('click', (e) => {
+            e.preventDefault();
+            setStep(2);
+        });
+        btnStageNext.addEventListener('click', (e) => {
+            e.preventDefault();
+            setStep(3);
+        });
+        btnNotesClose.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setStep(2); // zurück zum Modell
+        });
+
+        // Footer
+        document.getElementById('year').textContent = new Date().getFullYear();
     </script>
 </body>
 
