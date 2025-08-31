@@ -207,28 +207,36 @@
             border-radius: 9999px;
             margin-top: 6px
         }
-        /* CPU-Rahmen (um Rechen- & Steuerwerk) */
+        /* Zeilenumbruch-Labels */
+        
+        .label {
+            display: block;
+            margin-top: 6px
+        }
+        /* CPU-Rahmen (um RW & SW & CPU) */
         
         .cpu-frame {
             position: absolute;
-            left: 150px;
-            top: 180px;
-            width: 600px;
-            height: 110px;
+            left: 200px;
+            /* umfasst RW (x≈220) bis SW (x≈430+160) */
+            top: 160px;
+            width: 420px;
+            height: 160px;
+            /* genug Platz für CPU-Feld + RW/SW */
             border-radius: 16px;
             border: 2px dashed #2b579a;
             display: none;
-            background-color: #34d399;
+            background: transparent;
         }
         
         .cpu-label {
             position: absolute;
             left: 50%;
-            top: -16px;
+            top: 10px;
             transform: translateX(-50%);
             background: #0b1b2b;
             border: 1px solid #153257;
-            padding: 4px 10px;
+            padding: 6px 14px;
             border-radius: 10px;
             font-weight: 800
         }
@@ -311,7 +319,7 @@
     <header class="header">
         <div class="header-inner">
             <div class="logo">visualiser</div>
-            <div class="tag">Interaktive Unterrichtstools • <b>Dark</b> Colorpack</div>
+            <div class="tag">Interaktive Unterrichtstools</div>
         </div>
     </header>
 
@@ -415,15 +423,14 @@
 
                 <!-- Bus VARIANTEN (Vertikalanschlüsse bei x=360,600,820) -->
                 <svg id="svg-triple" viewBox="0 0 1000 620" preserveAspectRatio="none" class="hide">
-        <line class="bus"     x1="160" y1="420" x2="860" y2="420"/>
+        <line class="bus"      x1="160" y1="420" x2="860" y2="420"/>
         <line class="bus-addr" x1="160" y1="460" x2="860" y2="460"/>
         <line class="bus-ctrl" x1="160" y1="380" x2="860" y2="380"/>
         <!-- Abgänge hoch -->
         <line class="bus" x1="360" y1="240" x2="360" y2="460"/>
         <line class="bus" x1="600" y1="240" x2="600" y2="460"/>
         <line class="bus" x1="820" y1="240" x2="820" y2="460"/>
-         <line class="bus" x1="200" y1="380" x2="200" y2="530"/>
-        
+        <line class="bus" x1="200" y1="380" x2="200" y2="530"/>
       </svg>
 
                 <svg id="svg-simple" viewBox="0 0 1000 620" preserveAspectRatio="none">
@@ -433,24 +440,32 @@
         <line class="systembus" x1="820" y1="240" x2="820" y2="440"/>
       </svg>
 
-                <!-- CPU-Rahmen (nur um RW & SW) -->
+                <!-- CPU-Rahmen (um RW & SW & CPU) -->
                 <div id="cpu-frame" class="cpu-frame">
                     <div class="cpu-label">CPU</div>
                 </div>
 
+                <!-- CPU-Feld (erscheint zusammen mit CPU-Rahmen) -->
+                <div id="cpu-pill" class="block" style="left:210px; top:160px; width: 380px; height: 130px; display:none;">CPU</div>
+
+
+
+
                 <!-- Drei Werke -->
-                <div id="alu" class="block" style="left:320px; top:100px; display:none;">CPU
-                    <div class="chip" id="lbl-alu" style="display:none">Rechenwerk</div>
+                <div id="rw" class="block" style="left:220px; top:200px; display:none;">
+                    Rechenwerk
+                    <span class="label chip" id="lbl-rw" style="display:none">Rechenwerk</span>
                 </div>
-                <div id="rw" class="block" style="left:220px; top:200px; display:none;">Rechenwerk</div>
-                <div id="sw" class="block" style="left:430px; top:200px; display:none;">Steuerwerk
-                    <div class="chip" id="lbl-sw" style="display:none">Steuerwerk</div>
+
+                <div id="sw" class="block" style="left:420px; top:200px; display:none;">
+                    Steuerwerk
+                    <span class="label chip" id="lbl-sw" style="display:none">Steuerwerk</span>
                 </div>
 
                 <!-- Speicher & I/O (beide initial ausgeblendet) -->
                 <div id="mem" class="block" style="left:600px; top:200px; display:none;">
                     Speicher
-                    <div class="chip" id="lbl-mem" style="display:none">Speicherwerk</div>
+                    <span class="label chip" id="lbl-mem" style="display:none">Speicherwerk</span>
                 </div>
 
                 <div id="io" class="block" style="left:180px; top:600px; display:none;">
@@ -474,7 +489,7 @@
     </main>
 
     <div style="max-width:1500px;margin:14px auto 40px;padding:0 16px;color:var(--muted);font-size:12px">
-        © Dein Unterrichtstool • Von-Neumann-Architektur mit wählbarem Detailgrad
+        <a id="footerLink" href="https://datenflix007.github.io/" target="_blank" rel="noopener" style="color: white; text-decoration: none;">© <span id="year"></span> Felix Staacke</a>
     </div>
 
     <script>
@@ -498,10 +513,10 @@
         const legendSimple = document.getElementById('legend-simple');
 
         const cpuFrame = document.getElementById('cpu-frame');
-        const alu = document.getElementById('alu');
+        const cpuPill = document.getElementById('cpu-pill');
         const rw = document.getElementById('rw');
         const sw = document.getElementById('sw');
-        const lblALU = document.getElementById('lbl-alu');
+        const lblRW = document.getElementById('lbl-rw');
         const lblSW = document.getElementById('lbl-sw');
 
         const mem = document.getElementById('mem');
@@ -520,8 +535,8 @@
             show(svgTriple, on && busTriple.checked);
             show(legendTriple, on && busTriple.checked);
 
-            // Sichtbarkeit der Werke / Speicher / IO
-            applyDreiWerke(); // zeigt ALU, RW, SW + Speicher, wenn aktiviert
+            // Werke / Speicher / IO
+            applyDreiWerke();
             applyMemLabel();
             applyCpuFrame();
             applyIoVisibility();
@@ -537,9 +552,8 @@
         }
 
         function applyDreiWerke() {
-            // Rechen- & Steuerwerk + ALU erscheinen nur, wenn VNA + DreiWerke
+            // Rechen- & Steuerwerk erscheinen nur, wenn VNA + DreiWerke
             const worksOn = chkVNA.checked && chkDrei.checked;
-            disp(alu, worksOn);
             disp(rw, worksOn);
             disp(sw, worksOn);
 
@@ -547,23 +561,23 @@
             disp(mem, worksOn);
 
             // Labels der Werke
-            lblALU.style.display = (worksOn && chkRWLbl.checked) ? 'inline-block' : 'none';
-            lblSW.style.display = (worksOn && chkSWLbl.checked) ? 'inline-block' : 'none';
+            lblRW.style.display = (worksOn && chkRWLbl.checked) ? 'block' : 'none';
+            lblSW.style.display = (worksOn && chkSWLbl.checked) ? 'block' : 'none';
         }
 
         function applyCpuFrame() {
-            // Rahmen nur wenn VNA + DreiWerke + Option aktiv
+            // Rahmen + CPU-Feld nur wenn VNA + DreiWerke + Option aktiv
             const on = chkVNA.checked && chkDrei.checked && chkCPUFrame.checked;
             disp(cpuFrame, on);
+            disp(cpuPill, on); // CPU-Feld erscheint zusammen mit dem Rahmen
         }
 
         function applyMemLabel() {
             const on = chkVNA.checked && chkDrei.checked && chkMemLbl.checked;
-            lblMEM.style.display = on ? 'inline-block' : 'none';
+            lblMEM.style.display = on ? 'block' : 'none';
         }
 
         function applyIoVisibility() {
-            // IO separat steuerbar; initial aus
             const on = chkVNA.checked && chkIO.checked;
             disp(io, on);
         }
@@ -573,7 +587,7 @@
             if (io.firstChild) io.firstChild.nodeValue = title;
         }
 
-        // Init: alles aus
+        // Init
         applyVNA();
 
         // Events
@@ -586,10 +600,10 @@
             applyMemLabel();
         });
         chkSWLbl.addEventListener('change', () => {
-            lblSW.style.display = (chkVNA.checked && chkDrei.checked && chkSWLbl.checked) ? 'inline-block' : 'none';
+            lblSW.style.display = (chkVNA.checked && chkDrei.checked && chkSWLbl.checked) ? 'block' : 'none';
         });
         chkRWLbl.addEventListener('change', () => {
-            lblALU.style.display = (chkVNA.checked && chkDrei.checked && chkRWLbl.checked) ? 'inline-block' : 'none';
+            lblRW.style.display = (chkVNA.checked && chkDrei.checked && chkRWLbl.checked) ? 'block' : 'none';
         });
         chkCPUFrame.addEventListener('change', applyCpuFrame);
         chkMemLbl.addEventListener('change', applyMemLabel);
