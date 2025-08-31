@@ -173,7 +173,6 @@
             height: 100%;
             position: relative
         }
-        /* Tipp zentriert (nur in Schritt 2 sichtbar, aber zentriert bereit) */
         
         .hint {
             position: absolute;
@@ -203,6 +202,10 @@
             text-align: center;
             font-weight: 700;
             box-shadow: 0 10px 18px rgba(4, 17, 46, .35) inset, 0 10px 22px rgba(0, 0, 0, .25)
+        }
+        
+        .block.clickable {
+            cursor: pointer
         }
         
         .chip {
@@ -271,6 +274,10 @@
             stroke: #93c5fd;
             stroke-width: 12;
             opacity: .9
+        }
+        
+        .bus-group {
+            cursor: pointer
         }
         
         .hide {
@@ -352,7 +359,7 @@
             bottom: 22px;
             z-index: 2
         }
-        /* Merksatz-Overlay (unverändert) */
+        /* Merksatz/Detail Overlays */
         
         .overlay {
             position: absolute;
@@ -398,7 +405,7 @@
             justify-content: flex-end;
             gap: 10px
         }
-        /* NEU: Breites Info-Panel (Schritt 1) */
+        /* Breites Info-Panel (Schritt 1) */
         
         .info-wide {
             grid-column: 2 / 4;
@@ -426,6 +433,13 @@
             padding-top: 12px;
             margin-top: 12px
         }
+        /* Galerie-Styles für Detail-Overlays */
+        
+        .gallery img {
+            max-width: 100%;
+            border-radius: 12px;
+            margin: 6px 0
+        }
     </style>
 </head>
 
@@ -450,22 +464,21 @@
     </label>
         </aside>
 
-        <!-- NEU Schritt 1: Breites Info-Panel (spannt Details + Modell) -->
+        <!-- Schritt 1: Breites Info-Panel -->
         <section id="info-panel" class="panel info-wide hide" aria-live="polite">
             <h3>Einführung</h3>
-            <div class="wide-body" style="text-align: center; ">
+            <div class="wide-body" style="text-align:center">
+                <!-- Deine Bilder/Texte für den Intro-Teil -->
+                <img src="media/vna/vna00.webp" style="width:80%" alt="">
+                <img src="media/vna/vna01.webp" style="width:80%" alt="">
+                <img src="media/vna/vna02.webp" style="width:80%" alt="">
+                <img src="media/vna/vna03.webp" style="width:60%;border-radius:10%" alt=""><br/> Nachbau der Z3 1941 (der erste durch Konrad Zuse entwickelte programmierbare Rechner ist steuerbar durch Lochstreifen)<br />
+                <img src="media/vna/vna04.webp" style="width:60%;border-radius:10%" alt=""><br/> der ENIAC Computer 1945 (der zweite programmierbare Rechner ist steuerbar durch Steckverbindungen)<br />
+                <img src="media/vna/vna05.webp" style="width:60%;border-radius:10%" alt=""><br/> zwei der Frauen, die den ENIAC programmierten<br />
 
-                <img src="media/vna/vna00.webp" style="width: 80%;" /><br />
-                <img src="media/vna/vna01.webp" style="width: 80%;" /><br />
-                <img src="media/vna/vna02.webp" style="width: 80%;" /><br />
-                <img src="media/vna/vna03.webp" style="width: 60%; border-radius: 10%;" /><br /> Nachbau der Z3 1941 (der erste durch Konrad Zuse entwickelte programmierbare Rechner ist steuerbar durch Lochstreifen)<br />
-                <img src="media/vna/vna04.webp" style="width: 60%; border-radius: 10%;" /><br /> der ENIAC Computer 1945 (der zweite programmierbare Rechner ist steuerbar durch Steckverbindungen)<br />
-                <img src="media/vna/vna05.webp" style="width: 60%; border-radius: 10%;" /><br /> zwei der Frauen, die den ENIAC programmierten
 
-                <img src="media/vna/vna06.webp" style="width: 80%;" /><br />
-                <img src="media/vna/vna07.webp" style="width: 80%;" /><br />
-                <img src="media/vna/vna08.webp" style="width: 80%;" /><br />
-                <img src="media/vna/vna09.webp" style="width: 80%;" /><br />
+
+
             </div>
             <div class="wide-footer">
                 <button id="btn-info-next" class="btn btn-primary">Weiter</button>
@@ -486,50 +499,43 @@
 
             <label class="opt">
       <input id="chk-steuerwerk-label" type="checkbox" />
-      <div>
-        <div>Steuerwerk-Beschriftung</div>
-        <small>Label anzeigen</small>
-      </div>
+      <div><div>Steuerwerk-Beschriftung</div><small>Label anzeigen</small></div>
     </label>
 
             <label class="opt">
       <input id="chk-rechenwerk-label" type="checkbox" />
-      <div>
-        <div>Rechenwerk-Beschriftung</div>
-        <small>Label anzeigen</small>
-      </div>
+      <div><div>Rechenwerk-Beschriftung</div><small>Label anzeigen</small></div>
     </label>
 
             <label class="opt">
       <input id="chk-cpu-frame" type="checkbox" />
-      <div>
-        <div>CPU-Rahmen einblenden</div>
-        <small>Rahmen um Rechen- & Steuerwerk (mit „CPU“)</small>
-      </div>
+      <div><div>CPU-Rahmen einblenden</div><small>Rahmen um Rechen- & Steuerwerk (mit „CPU“)</small></div>
     </label>
 
             <label class="opt">
       <input id="chk-mem-label" type="checkbox" />
-      <div>
-        <div>Speicherwerk-Beschriftung</div>
-        <small>Label anzeigen</small>
-      </div>
+      <div><div>Speicherwerk-Beschriftung</div><small>Label anzeigen</small></div>
     </label>
 
             <div class="group">
                 <h3>Bus-Variante</h3>
                 <label class="opt">
         <input id="bus-simple" type="radio" name="busmode" checked />
-        <div>
-          <div>Einfacher Systembus</div>
-          <small>ein dicker Strich</small>
-        </div>
+        <div><div>Einfacher Systembus</div><small>ein dicker Strich</small></div>
       </label>
                 <label class="opt">
         <input id="bus-triple" type="radio" name="busmode" />
+        <div><div>Drei-Bus-System</div><small>Daten • Adresse • Kontrolle</small></div>
+      </label>
+            </div>
+
+            <!-- NEU: Bus einblenden -->
+            <div class="group">
+                <label class="opt">
+        <input id="chk-bus-visible" type="checkbox" />
         <div>
-          <div>Drei-Bus-System</div>
-          <small>Daten • Adresse • Kontrolle</small>
+          <div>Bus einblenden</div>
+          <small>Systembus bzw. Drei-Bus anzeigen</small>
         </div>
       </label>
             </div>
@@ -537,18 +543,12 @@
             <div class="group">
                 <label class="opt">
         <input id="chk-io" type="checkbox" />
-        <div>
-          <div>Ein/Ausgabe einblenden</div>
-          <small>als „periphere Geräte“ anzeigen</small>
-        </div>
+        <div><div>Ein/Ausgabe einblenden</div><small>als „periphere Geräte“ anzeigen</small></div>
       </label>
 
                 <label class="opt">
         <input id="chk-io-rename" type="checkbox" />
-        <div>
-          <div>Als „periphere Geräte“ benennen</div>
-          <small>ändert die Beschriftung der Ein/Ausgabe</small>
-        </div>
+        <div><div>Als „periphere Geräte“ benennen</div><small>ändert die Beschriftung der Ein/Ausgabe</small></div>
       </label>
             </div>
         </aside>
@@ -556,23 +556,29 @@
         <!-- Rechts: Bühne/Modell (Start = VERSTECKT) -->
         <section class="panel stage hide">
             <div class="canvas" id="canvas" aria-live="polite">
-                <!-- Bus VARIANTEN -->
+                <!-- Drei-Bus -->
                 <svg id="svg-triple" viewBox="0 0 1000 620" preserveAspectRatio="none" class="hide" aria-hidden="true">
-        <line class="bus"      x1="160" y1="420" x2="860" y2="420"/>
-        <line class="bus-addr" x1="160" y1="460" x2="860" y2="460"/>
-        <line class="bus-ctrl" x1="160" y1="380" x2="860" y2="380"/>
-        <line class="bus" x1="360" y1="240" x2="360" y2="460"/>
-        <line class="bus" x1="600" y1="240" x2="600" y2="460"/>
-        <line class="bus" x1="820" y1="240" x2="820" y2="460"/>
-        <line class="bus" x1="200" y1="380" x2="200" y2="530"/>
+        <g id="bus-triple-group" class="bus-group">
+          <line class="bus"      x1="160" y1="420" x2="860" y2="420"/>
+          <line class="bus-addr" x1="160" y1="460" x2="860" y2="460"/>
+          <line class="bus-ctrl" x1="160" y1="380" x2="860" y2="380"/>
+          <!-- Abgänge hoch -->
+          <line class="bus" x1="360" y1="240" x2="360" y2="460"/>
+          <line class="bus" x1="600" y1="240" x2="600" y2="460"/>
+          <line class="bus" x1="820" y1="240" x2="820" y2="460"/>
+          <line class="bus" x1="200" y1="380" x2="200" y2="530"/>
+        </g>
       </svg>
 
+                <!-- Einfacher Systembus -->
                 <svg id="svg-simple" viewBox="0 0 1000 620" preserveAspectRatio="none" aria-hidden="true">
-        <line class="systembus" x1="160" y1="440" x2="860" y2="440"/>
-        <line class="systembus" x1="360" y1="240" x2="360" y2="440"/>
-        <line class="systembus" x1="600" y1="240" x2="600" y2="440"/>
-        <line class="systembus" x1="820" y1="240" x2="820" y2="440"/>
-        <line class="systembus" x1="200" y1="440" x2="200" y2="530"/>
+        <g id="bus-simple-group" class="bus-group">
+          <line class="systembus" x1="160" y1="440" x2="860" y2="440"/>
+          <line class="systembus" x1="360" y1="240" x2="360" y2="440"/>
+          <line class="systembus" x1="600" y1="240" x2="600" y2="440"/>
+          <line class="systembus" x1="820" y1="240" x2="820" y2="440"/>
+          <line class="systembus" x1="200" y1="440" x2="200" y2="530"/>
+        </g>
       </svg>
 
                 <!-- CPU-Rahmen -->
@@ -582,10 +588,10 @@
                 <div id="cpu-pill" class="block" style="left:210px; top:160px; width:380px; height:130px; display:none;">CPU</div>
 
                 <!-- Drei Werke -->
-                <div id="rw" class="block" style="left:220px; top:200px; display:none;">Rechenwerk <span class="label chip" id="lbl-rw" style="display:none">Rechenwerk</span></div>
-                <div id="sw" class="block" style="left:420px; top:200px; display:none;">Steuerwerk <span class="label chip" id="lbl-sw" style="display:none">Steuerwerk</span></div>
-                <div id="mem" class="block" style="left:600px; top:200px; display:none;">Speicher <span class="label chip" id="lbl-mem" style="display:none">Speicherwerk</span></div>
-                <div id="io" class="block" style="left:180px; top:600px; display:none;">Ein/Ausgabe
+                <div id="rw" class="block" style="left:220px; top:200px; display:none;">Rechenwerk <span class="label chip" id="lbl-rw" style="display:none">ALU</span></div>
+                <div id="sw" class="block" style="left:420px; top:200px; display:none;">Steuerwerk </div>
+                <div id="mem" class="block" style="left:600px; top:200px; display:none;">Speicherwerk <span class="label chip" id="lbl-mem" style="display:none">HDD/ SSD</span></div>
+                <div id="io" class="block" style="left:180px; top:660px; display:none;">Ein/Ausgabe
                     <div class="chip">Tastatur · Anzeige · SSD</div>
                 </div>
 
@@ -623,6 +629,20 @@
                     </div>
                 </div>
             </div>
+
+            <!-- NEU: Detail-Overlay für Klick auf RW/SW/MEM/BUS -->
+            <div id="detail-overlay" class="overlay hide" role="dialog" aria-modal="true" aria-label="Details">
+                <div class="info-card">
+                    <header id="detail-title">Details</header>
+                    <div class="card-body" id="detail-body">
+                        <!-- Hier füllen wir dynamisch Inhalte (Bilder/Texte) ein -->
+                    </div>
+                    <div class="card-footer">
+                        <button id="btn-detail-close" class="btn">Schließen</button>
+                    </div>
+                </div>
+            </div>
+
         </section>
     </main>
 
@@ -643,6 +663,7 @@
         const chkRWLbl = document.getElementById('chk-rechenwerk-label');
         const chkCPUFrame = document.getElementById('chk-cpu-frame');
         const chkMemLbl = document.getElementById('chk-mem-label');
+        const chkBusVisible = document.getElementById('chk-bus-visible');
         const chkIO = document.getElementById('chk-io');
         const chkIORename = document.getElementById('chk-io-rename');
         const busSimple = document.getElementById('bus-simple');
@@ -651,6 +672,8 @@
         // Stage elements
         const svgTriple = document.getElementById('svg-triple');
         const svgSimple = document.getElementById('svg-simple');
+        const busGroupSimple = document.getElementById('bus-simple-group');
+        const busGroupTriple = document.getElementById('bus-triple-group');
         const legendTriple = document.getElementById('legend-triple');
         const legendSimple = document.getElementById('legend-simple');
         const cpuFrame = document.getElementById('cpu-frame');
@@ -663,12 +686,17 @@
         const lblMEM = document.getElementById('lbl-mem');
         const io = document.getElementById('io');
 
-        // Step buttons & overlays
+        // Overlays & Buttons
         const btnInfoNext = document.getElementById('btn-info-next');
         const btnStagePrev = document.getElementById('btn-stage-prev');
         const btnStageNext = document.getElementById('btn-stage-next');
         const notesOverlay = document.getElementById('notes-overlay');
         const btnNotesClose = document.getElementById('btn-notes-close');
+
+        const detailOverlay = document.getElementById('detail-overlay');
+        const detailTitle = document.getElementById('detail-title');
+        const detailBody = document.getElementById('detail-body');
+        const btnDetailClose = document.getElementById('btn-detail-close');
 
         const forceShow = (el, on) => {
             el.classList.toggle('hide', !on);
@@ -677,13 +705,17 @@
         };
         const disp = (el, on) => el.style.display = on ? '' : 'none';
 
-        // Visualisierung
+        // === Visualisierung ===
+        function applyBuses() {
+            const busOn = chkVNA.checked && chkBusVisible.checked;
+            forceShow(svgSimple, busOn && busSimple.checked);
+            forceShow(legendSimple, busOn && busSimple.checked);
+            forceShow(svgTriple, busOn && busTriple.checked);
+            forceShow(legendTriple, busOn && busTriple.checked);
+        }
+
         function applyVNA() {
-            const on = chkVNA.checked;
-            forceShow(svgSimple, on && busSimple.checked);
-            forceShow(legendSimple, on && busSimple.checked);
-            forceShow(svgTriple, on && busTriple.checked);
-            forceShow(legendTriple, on && busTriple.checked);
+            applyBuses();
             applyDreiWerke();
             applyMemLabel();
             applyCpuFrame();
@@ -693,10 +725,7 @@
 
         function applyBusVariant() {
             if (!chkVNA.checked) return;
-            forceShow(svgSimple, busSimple.checked);
-            forceShow(legendSimple, busSimple.checked);
-            forceShow(svgTriple, busTriple.checked);
-            forceShow(legendTriple, busTriple.checked);
+            applyBuses();
         }
 
         function applyDreiWerke() {
@@ -704,6 +733,9 @@
             disp(rw, worksOn);
             disp(sw, worksOn);
             disp(mem, worksOn);
+            rw.classList.toggle('clickable', worksOn);
+            sw.classList.toggle('clickable', worksOn);
+            mem.classList.toggle('clickable', worksOn);
             lblRW.style.display = (worksOn && chkRWLbl.checked) ? 'block' : 'none';
             lblSW.style.display = (worksOn && chkSWLbl.checked) ? 'block' : 'none';
         }
@@ -728,14 +760,15 @@
             if (io.firstChild) io.firstChild.nodeValue = title;
         }
 
-        // Flow: 0 Start, 1 Info, 2 Modell+Details, 3 Merksatz
+        // === Flow / State ===
+        // 0 Start (nur Architektur), 1 Info, 2 Modell+Details, 3 Merksatz
         let flowStep = 0;
 
         function setStep(n) {
             flowStep = n;
             forceShow(infoPanel, n === 1);
             forceShow(settingsPanel, n >= 2);
-            forceShow(stagePanel, n >= 2); // Bühne erst ab Schritt 2
+            forceShow(stagePanel, n >= 2);
             forceShow(btnStagePrev, n === 2);
             forceShow(btnStageNext, n === 2);
             forceShow(notesOverlay, n === 3);
@@ -756,6 +789,8 @@
         // Events
         chkVNA.addEventListener('change', handleVNAChange);
         [busSimple, busTriple].forEach(r => r.addEventListener('change', applyBusVariant));
+        chkBusVisible.addEventListener('change', applyBuses);
+
         chkDrei.addEventListener('change', () => {
             applyDreiWerke();
             applyCpuFrame();
@@ -772,12 +807,14 @@
         chkIO.addEventListener('change', applyIoVisibility);
         chkIORename.addEventListener('change', applyIoRename);
 
-        // Space toggelt Architektur
         window.addEventListener('keydown', (e) => {
             if (e.code === 'Space') {
                 e.preventDefault();
                 chkVNA.checked = !chkVNA.checked;
                 handleVNAChange();
+            }
+            if (e.key === 'Escape' && !detailOverlay.classList.contains('hide')) {
+                forceShow(detailOverlay, false);
             }
             if (e.key === 'Escape' && flowStep === 3) {
                 setStep(2);
@@ -785,22 +822,67 @@
         });
 
         // Schritt-Logik
-        btnInfoNext.addEventListener('click', e => {
+        document.getElementById('btn-info-next').addEventListener('click', e => {
             e.preventDefault();
             setStep(2);
         });
-        btnStagePrev.addEventListener('click', e => {
+        document.getElementById('btn-stage-prev').addEventListener('click', e => {
             e.preventDefault();
             setStep(1);
-        }); // Zurück zur Info
-        btnStageNext.addEventListener('click', e => {
+        });
+        document.getElementById('btn-stage-next').addEventListener('click', e => {
             e.preventDefault();
             setStep(3);
-        }); // Merksatz
-        btnNotesClose.addEventListener('click', e => {
+        });
+        document.getElementById('btn-notes-close').addEventListener('click', e => {
             e.preventDefault();
             setStep(2);
-        }); // zurück zum Modell
+        });
+
+        // === Klick-Overlays (Details) ===
+        const detailContent = {
+            rw: `
+      <div class="gallery" style="text-align:center">
+        <!-- HIER deine Bilder/Erklärgrafiken zum Rechenwerk einfügen -->
+        <!-- Beispiel: <img src="media/vna/rw01.webp" alt=""> -->
+        <img src="media/vna/vna07.webp" style="width:80%" alt="">
+      </div>`,
+            sw: `
+      <div class="gallery" style="text-align:center">
+        <!-- Bilder/Diagramme zum Steuerwerk -->
+        <img src="media/vna/vna06.webp" style="width:80%" alt="">
+      </div>`,
+            mem: `
+      <div class="gallery" style="text-align:center">
+        <!-- Bilder/Diagramme zum Speicher -->
+        <img src="media/vna/vna08.webp" style="width:80%" alt="">
+      </div>`,
+            bus: `
+      <div class="gallery"  style="text-align:center">
+        <!-- Bilder/Diagramme zum (System-)Bus / Drei-Bus -->
+        <img src="media/vna/vna09.webp" style="width:80%" alt="">
+      </div>`
+        };
+        const detailTitles = {
+            rw: 'ALU',
+            sw: 'Steuerwerk',
+            mem: 'SSD / HDD',
+            bus: 'Mainboard'
+        };
+
+        function showDetail(kind) {
+            detailTitle.textContent = detailTitles[kind] || 'Details';
+            detailBody.innerHTML = detailContent[kind] || '';
+            forceShow(detailOverlay, true);
+        }
+
+        // Klickflächen aktivieren
+        rw.addEventListener('click', () => showDetail('rw'));
+        sw.addEventListener('click', () => showDetail('sw'));
+        mem.addEventListener('click', () => showDetail('mem'));
+        if (busGroupSimple) busGroupSimple.addEventListener('click', () => showDetail('bus'));
+        if (busGroupTriple) busGroupTriple.addEventListener('click', () => showDetail('bus'));
+        btnDetailClose.addEventListener('click', () => forceShow(detailOverlay, false));
 
         // Footer
         document.getElementById('year').textContent = new Date().getFullYear();
